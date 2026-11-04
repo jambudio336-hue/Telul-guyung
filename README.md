@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="Mazkiplay_Nusantara banner" width="100%">
+<img src="banner.png" alt="Mazkiplay_Nusantara banner" width="100%">
 
 <a href="#-quick-start"><img src="https://img.shields.io/badge/STATUS-OPERASIONAL-00ffa3?style=for-the-badge&labelColor=050d0b" alt="status"></a>
 <img src="https://img.shields.io/badge/VERSI-4.0.0-00c8ff?style=for-the-badge&labelColor=050d0b" alt="versi">
@@ -14,7 +14,7 @@
 <a href="#-arsitektur">Arsitektur</a> ·
 <a href="#-protokol">Protokol</a> ·
 <a href="CHANGELOG.md">Changelog</a> ·
-<a href="#-lisensi">Lisensi</a>
+<a href="LICENSE">Lisensi</a>
 
 </div>
 
